@@ -44,7 +44,7 @@ explore: patient_json {
     relationship: one_to_one
   }
 
-  # This is a way to narrow down objects based on predicate logic
+  # The following is a way to narrow down objects based on predicate logic
   # For instance, if a front end user asks for a field in home_address, then the home_address view is being
   # referenced in the query. If so, then the home_address record will be the one with use = home
 
