@@ -48,7 +48,8 @@ explore: patient_json {
   # For instance, if a front end user asks for a field in home_address, then the home_address view is being
   # referenced in the query. If so, then the home_address record will be the one with use = home
 
-  # Example:
+  # Example Output based on selecting official_name first_name and home_address city:
+  #
   # SELECT
   #   official_name.given[1]  AS "official_name.first_name",
   #   home_address.city  AS "home_address.city"
