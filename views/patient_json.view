@@ -1,0 +1,223 @@
+# Took jsonb example from here https://www.hl7.org/fhir/patient-example.json.html
+
+# https://community.looker.com/technical-tips-tricks-1021/parsing-json-data-in-looker-23938
+#
+# It is possible to interrogate json structure to systematically generate LookML
+# https://github.com/leighajarett/JSON_to_LookML
+
+# Note: There is no need to have all views in a single view file
+# I did it this way for testing
+# Views can be separated into several files for organizational purposes
+
+view: patient_json {
+  derived_table: {
+    sql:
+      SELECT
+          1 AS some_id -- Example of top level record information outside of fhir - maybe metadata or something
+        , '{"resourceType":"Patient","id":"example","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t<table>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Name</td>\n\t\t\t\t\t\t<td>Peter James \n              <b>Chalmers</b> (&quot;Jim&quot;)\n            </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Address</td>\n\t\t\t\t\t\t<td>534 Erewhon, Pleasantville, Vic, 3999</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Contacts</td>\n\t\t\t\t\t\t<td>Home: unknown. Work: (03) 5555 6473</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Id</td>\n\t\t\t\t\t\t<td>MRN: 12345 (Acme Healthcare)</td>\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t</div>"},"identifier":[{"use":"usual","type":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v2-0203","code":"MR"}]},"system":"urn:oid:1.2.36.146.595.217.0.1","value":"12345","period":{"start":"2001-05-06"},"assigner":{"display":"Acme Healthcare"}}],"active":true,"name":[{"use":"official","family":"Chalmers","given":["Peter","James"]},{"use":"usual","given":["Jim"]},{"use":"maiden","family":"Windsor","given":["Peter","James"],"period":{"end":"2002"}}],"telecom":[{"use":"home"},{"system":"phone","value":"(03) 5555 6473","use":"work","rank":1},{"system":"phone","value":"(03) 3410 5613","use":"mobile","rank":2},{"system":"phone","value":"(03) 5555 8834","use":"old","period":{"end":"2014"}}],"gender":"male","birthDate":"1974-12-25","_birthDate":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-birthTime","valueDateTime":"1974-12-25T14:35:45-05:00"}]},"deceasedBoolean":false,"address":[{"use":"home","type":"both","text":"534 Erewhon St PeasantVille, Rainbow, Vic  3999","line":["534 Erewhon St"],"city":"PleasantVille","district":"Rainbow","state":"Vic","postalCode":"3999","period":{"start":"1974-12-25"}}],"contact":[{"relationship":[{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v2-0131","code":"N"}]}],"name":{"family":"du Marché","_family":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/humanname-own-prefix","valueString":"VV"}]},"given":["Bénédicte"]},"telecom":[{"system":"phone","value":"+33 (237) 998327"}],"address":{"use":"home","type":"both","line":["534 Erewhon St"],"city":"PleasantVille","district":"Rainbow","state":"Vic","postalCode":"3999","period":{"start":"1974-12-25"}},"gender":"female","period":{"start":"2012"}}],"managingOrganization":{"reference":"Organization/1"}}'::jsonb
+          AS patientjsonb
+      UNION ALL SELECT
+          2
+        , '{"resourceType":"Patient","id":"example","text":{"status":"generated","div":"<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t<table>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Name</td>\n\t\t\t\t\t\t<td>John Quinn \n              <b>Test1</b> (&quot;John&quot;)\n            </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Address</td>\n\t\t\t\t\t\t<td>123 Happy Pl, Testerville, GA, 12312</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Contacts</td>\n\t\t\t\t\t\t<td>Home: unknown. Work: 732 423 3388</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>Id</td>\n\t\t\t\t\t\t<td>MRN: 1223 (Acme Healthcare)</td>\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t</div>"},"identifier":[{"use":"usual","type":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v2-0203","code":"MR"}]},"system":"urn:oid:1.2.36.146.595.217.0.1","value":"78910","period":{"start":"2003-06-06"},"assigner":{"display":"Super Mega Healthcare"}}],"active":true,"name":[{"use":"official","family":"Chalmers","given":["John","Quinn"]},{"use":"usual","given":["John"]},{"use":"maiden","family":"Tangine","given":["Peter","James"],"period":{"end":"2009"}}],"telecom":[{"use":"home"},{"system":"phone","value":"732 423 3383","use":"work","rank":1},{"system":"phone","value":"732 933 1363","use":"old","period":{"end":"2007"}}],"gender":"male","birthDate":"1979-10-25","_birthDate":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-birthTime","valueDateTime":"1979-10-25T14:35:45-05:00"}]},"deceasedBoolean":false,"address":[{"use":"home","type":"both","text":"123 Happy Pl, Testerville, GA, 12312","line":["123 Happy Pl"],"city":"Testerville","district":"ROYGBIV","state":"GA","postalCode":"12312","period":{"start":"1979-10-25"}}],"contact":[{"relationship":[{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/v2-0131","code":"N"}]}],"name":{"family":"Yibyow","_family":{"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/humanname-own-prefix","valueString":"VV"}]},"given":["Terrance"]},"telecom":[{"system":"phone","value":"732 889-2288"}],"address":{"use":"home","type":"both","line":["123 Happy Pl"],"city":"Testerville","district":"ROYGBIV","state":"GA","postalCode":"12312","period":{"start":"1979-10-25"}},"gender":"female","period":{"start":"2012"}}],"managingOrganization":{"reference":"Organization/1"}}'
+    ;;
+    ## ^^ This is creating a CTE with 2 records that are hardcoded with format from https://www.hl7.org/fhir/patient-example.json.html
+    ## Each record has 2 columns: some_id (assuming there is some id, this is not actually used), patientjsonb (holds the jsonb object)
+  }
+
+  # Not required. Just a column at the top level that is peer to the patient json column
+  dimension: some_id {
+    type: number
+    sql: ${TABLE}.some_id ;;
+  }
+
+  # Start FHIR Data
+  ## Top Level
+  dimension: patientjsonb { # This would normally be hidden from UI
+    group_label: "Raw JSON"
+    label: "Raw JSON"
+    hidden: no
+    type: string
+    sql: ${TABLE}.patientjsonb ;;
+  }
+
+  ### Top Level Fields
+  dimension: resourceType {
+    type: string
+    sql: ${patientjsonb} ->> 'resourceType' ;;
+  }
+
+  dimension: id {
+    type: string
+    sql: ${patientjsonb} ->> 'id' ;;
+  }
+
+  dimension: gender {
+    type: string
+    sql: ${patientjsonb} ->> 'gender' ;;
+  }
+
+  dimension_group: birth {
+    type: time
+    sql: DATE(${patientjsonb} ->> 'birthDate') ;;
+    timeframes: [raw,date,month,year]
+  }
+
+  dimension: is_active {
+    group_label: "Flags"
+    type: yesno
+    sql: ${patientjsonb} ->> 'active' = 'true' ;;
+  }
+
+  dimension: is_deceased {
+    group_label: "Flags"
+    type: yesno
+    sql: ${patientjsonb} ->> 'deceasedBoolean' = 'true' ;;
+  }
+
+  ### Top Level Objects - Text
+  dimension: text {
+    hidden: yes
+    type: string
+    sql: ${patientjsonb} -> 'text' ;;
+  }
+
+  dimension: status {
+    view_label: "Patient Text"
+    type: string
+    sql: ${text} ->> 'status' ;;
+  }
+
+  dimension: div {
+    view_label: "Patient Text"
+    type: string
+    sql: ${text} ->> 'div' ;;
+    html: {{ value }} ;;
+  }
+
+  ### Top Level Objects - Managing Organization
+  dimension: managing_organization {
+    hidden: no
+    type: string
+    sql: ${patientjsonb} -> 'managingOrganization' ;;
+  }
+
+  dimension: reference {
+    view_label: "Patient Text"
+    type: string
+    sql: ${managing_organization}."reference" ;; # Using . instead of arrow notation
+  }
+
+  ### Top Level Arrays (these should be hidden - access data from subsequent views)
+  dimension: name {
+    group_label: "Raw JSON"
+    label: "Name JSON"
+    type: string
+    hidden: no
+    sql: ${patientjsonb} -> 'name' ;;
+  }
+
+  dimension: address {
+    group_label: "Raw JSON"
+    label: "Address JSON"
+    type: string
+    hidden: no
+    sql: ${patientjsonb} -> 'address' ;;
+  }
+
+}
+
+view: name {
+
+  dimension: _pk { # Derived PK
+    hidden: yes
+    primary_key: yes
+    type: string
+    sql: ${patient_json.id} || 'name' || RANDOM() ;;
+  }
+
+  dimension: use {
+    type: string
+    sql: ${TABLE}.use ;;
+  }
+
+  dimension: family {
+    type: string
+    sql: ${TABLE}.family ;;
+  }
+
+  ### Top Level Arrays (these should be hidden - access data from subsequent views)
+  # dimension: given {
+  #   type: string
+  #   hidden: no
+  #   sql: UNNEST(${TABLE}.given) ;; # This is probably not useful
+  # }
+
+  dimension: first_name {
+    type: string
+    sql: ${TABLE}.given[1] ;;
+  }
+
+  dimension: middle_name {
+    type: string
+    sql: ${TABLE}.given[2] ;;
+  }
+}
+
+view: official_name {
+  extends: [name]
+}
+
+view: address {
+
+  dimension: _pk { # Derived PK
+    hidden: yes
+    primary_key: yes
+    type: string
+    sql: ${patient_json.id} || 'address' || RANDOM() ;;
+  }
+
+  dimension: use {
+    type: string
+    sql: ${TABLE}.use ;;
+  }
+
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
+  dimension: text {
+    type: string
+    sql: ${TABLE}.text ;;
+  }
+
+  dimension: city {
+    type: string
+    sql: ${TABLE}.city ;;
+  }
+
+  dimension: district {
+    type: string
+    sql: ${TABLE}.district ;;
+  }
+
+  dimension: state {
+    type: string
+    sql: ${TABLE}.state ;;
+  }
+
+  dimension: postal_code {
+    type: string
+    sql: ${TABLE}.postalCode ;;
+  }
+
+  ## Period is just an object, may need to add in additional dimensions based on key set that exists
+  dimension: period_start {
+    type: string
+    sql: ${TABLE}.period ->> 'start' ;;
+  }
+}
+
+view: home_address {
+  extends: [address]
+}
