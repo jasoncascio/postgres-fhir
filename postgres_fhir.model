@@ -13,7 +13,7 @@ explore: patient_json {
     # This next part gathers the objects in the patientobject -> address array, casts the object to an addressable row for the
     # address view.
 
-    # Results in:
+    # For example if the city field from address is requested, then Looker will implement a join:
     #   SELECT
     #     address.city  AS "address.city"
     #   FROM patient_json
