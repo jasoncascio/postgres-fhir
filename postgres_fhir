@@ -1,0 +1,70 @@
+connection: "jc-postgres"
+
+include: "/views/*.view.lkml"                # include all views in the views/ folder in this project
+
+
+explore: patient_json {
+  label: "Patient Explore"
+  view_label: "Patient"
+  fields: [ALL_FIELDS*,-official_name.use] # This says include all fields from all joins, less official_name.use
+
+  join: address { # Reference to the address view
+    view_label: "All Addresses" # Just an alias name for front end usability
+    # This next part gathers the objects in the patientobject -> address array, casts the object to an addressable row for the
+    # address view.
+
+    # Results in:
+    #   SELECT
+    #     address.city  AS "address.city"
+    #   FROM patient_json
+    #   , jsonb_to_recordset(patient_json.patientjsonb -> 'address') AS
+    #     address(use text, type text, text text, city text, district text, state text, period jsonb, postalCode text)
+
+    sql: , jsonb_to_recordset(${patient_json.patientjsonb} -> 'address') AS
+           address(use text, type text, text text, city text, district text, state text, period jsonb, postalCode text) ;;
+    relationship: one_to_many
+  }
+
+  join: home_address {
+    sql: , jsonb_to_recordset(${patient_json.patientjsonb} -> 'address') AS
+      home_address(use text, type text, text text, city text, district text, state text, period jsonb, postalCode text) ;;
+    relationship: one_to_one
+  }
+
+  join: name {
+    view_label: "All Names"
+    sql: , jsonb_to_recordset(${patient_json.patientjsonb} -> 'name') AS
+           name(use text, family text, given text[]) ;;
+    relationship: one_to_many
+  }
+
+  join: official_name {
+    sql: , jsonb_to_recordset(${patient_json.patientjsonb} -> 'name') AS
+           official_name(use text, family text, given text[]) ;;
+    relationship: one_to_one
+  }
+
+  # This is a way to narrow down objects based on predicate logic
+  # For instance, if a front end user asks for a field in home_address, then the home_address view is being
+  # referenced in the query. If so, then the home_address record will be the one with use = home
+
+  # Example:
+  # SELECT
+  #   official_name.given[1]  AS "official_name.first_name",
+  #   home_address.city  AS "home_address.city"
+  # FROM patient_json
+  # , jsonb_to_recordset(patient_json.patientjsonb -> 'address') AS
+  #       home_address(use text, type text, text text, city text, district text, state text, period jsonb, postalCode text)
+  # , jsonb_to_recordset(patient_json.patientjsonb -> 'name') AS
+  #           official_name(use text, family text, given text[])
+  #
+  # WHERE 1=1
+  #     AND home_address.use = 'home'
+  #     AND official_name.use = 'official'
+
+  sql_always_where:
+    1=1
+    {% if home_address._in_query %} AND home_address.use = 'home' {% endif %} -- This conditional will insert the AND iff home_address data is requested
+    {% if official_name._in_query %} AND official_name.use = 'official' {% endif %}
+  ;;
+}
